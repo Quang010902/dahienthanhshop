@@ -104,7 +104,7 @@ const Register = (props) => {
         }
     }
     return (
-        <div className='user register w-100 position-absolute d-flex' onClick={props.toClose}>
+        <div className='user register w-100 position-absolute d-flex'>
             <div className="user-box position-relative register-box border-radius" onClick={(e) => e.stopPropagation()}>
                 <div className="header-form position-absolute" onClick={props.toClose}>
                     <FaTimes />

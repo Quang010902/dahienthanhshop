@@ -12,6 +12,8 @@ const Order = sequelize.define('Order', {
 	total_product_value: { type: DataTypes.INTEGER, allowNull: false },
 	delivery_charges: { type: DataTypes.INTEGER, allowNull: false },
 	total_order_value: { type: DataTypes.INTEGER, allowNull: false },
+	type: { type: DataTypes.STRING, allowNull: true, defaultValue: 'COD' },
+	code: { type: DataTypes.STRING, allowNull: true },
 }, {
 	timestamps: false,
 });

@@ -63,7 +63,7 @@ let listAdminSide = async (req, res, next) => {
         attributes: ['product_variant_id', 'quantity', 'state', 'created_at'],
         include: [
             {
-                model: Product, attributes: ['product_id', 'product_name'],
+                model: Product, attributes: ['product_id', 'product_name', 'sold'],
                 include: { model: Product_Price_History, attributes: ['price'], separate: true, order: [['created_at', 'DESC']] }
             },
             { model: Colour, attributes: ['colour_name'] },
@@ -80,6 +80,7 @@ let listAdminSide = async (req, res, next) => {
             colour_name: productVariant.Colour.colour_name,
             size_name: productVariant.Size.size_name,
             product_image: productVariant.Product_Images[0].path,
+            sold: productVariant.Product.sold,
             price: productVariant.Product.Product_Price_Histories[0].price,
             quantity: productVariant.quantity,
             state: productVariant.state,
@@ -95,7 +96,7 @@ let listCustomerSide = async (req, res, next) => {
     let whereClause;
     if (category_id != undefined && Number.isInteger(category_id))
         whereClause = { category_id }
-
+    
     try {
 
 

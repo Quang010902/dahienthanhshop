@@ -37,6 +37,12 @@ const Login = (props) => {
 				email: email,
 				password: password
 			})
+			if(respond?.data?.statusUser === false) {
+				swtoast.error({
+					text: "Tài khoản đã bị khóa !, vui lòng liên hệ admin mở khóa"
+				})
+				return
+			}
 			dispatch(customerLoginOrRegister(respond.data));
 			swtoast.success({
 				text: "Đăng nhập tài khoản thành công!"
@@ -44,13 +50,13 @@ const Login = (props) => {
 			props.toClose();
 		} catch (error) {
 			swtoast.error({
-				text: error.response.data
+				text: error?.response?.data
 			})
 		}
 	}
 
 	return (
-		<div className='user login w-100 position-absolute d-flex' onClick={props.toClose}>
+		<div className='user login w-100 position-absolute d-flex'>
 			<div className="user-box position-relative login-box text-center border-radius" onClick={(e) => e.stopPropagation()}>
 				<div className="header-form position-absolute" onClick={props.toClose}>
 					<FaTimes />

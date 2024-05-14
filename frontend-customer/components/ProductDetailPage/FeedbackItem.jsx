@@ -21,9 +21,6 @@ const FeedbackItem = (props) => {
                         <div className="feedback-user-name">
                             {customer}
                         </div>
-                        <div className='feedback-colour'>
-                            {`${colour} / ${size}`}
-                        </div>
                         <div className='feedback-content mt-auto align-self-start'>
                             {content}
                         </div>

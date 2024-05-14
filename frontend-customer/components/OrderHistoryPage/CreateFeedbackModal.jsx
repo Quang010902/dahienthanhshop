@@ -8,7 +8,7 @@ import { backendAPI } from '@/config'
 import { swtoast } from '@/mixins/swal.mixin'
 
 const CreateFeedbackModal = (props) => {
-    const { isOpen, setIsOpen, productVariantId, setProductVariantId, refreshOrderList } = props
+    const { isOpen, setIsOpen, productVariantId, setProductVariantId, refreshOrderList, url } = props
     const [rate, setRate] = useState(0)
     const [content, setContent] = useState('')
     const customerInfo = useSelector((state) => state.customer.customerInfo)
@@ -19,8 +19,16 @@ const CreateFeedbackModal = (props) => {
         setProductVariantId(null)
         setIsOpen(false)
     };
-
+    console.log('productVariantId', productVariantId)
     const handleCreateFeedback = async () => {
+        if(!rate) {
+            swtoast.error({ text: "Vui lòng chọn sao đánh giái!" });
+            return
+        }
+        if(!content) {
+            swtoast.error({ text: "Vui lòng nhập đánh giá" });
+            return
+        }
         if (isLoggedIn) {
             try {
                 let feedback = {
@@ -28,7 +36,7 @@ const CreateFeedbackModal = (props) => {
                     product_variant_id: productVariantId,
                     rate, content
                 }
-                await axios.post(`${backendAPI}/api/feedback/create`, feedback)
+                await axios.post(`${backendAPI}/api/feedback/createFeedBack`, feedback)
                 swtoast.success({ text: "Tạo đánh giá thành công" })
                 setProductVariantId(null)
                 setIsOpen(false)
@@ -39,6 +47,8 @@ const CreateFeedbackModal = (props) => {
                 setIsOpen(false)
                 swtoast.error({ text: "Có lỗi khi tạo đánh giá vui lòng thử lại!" });
             }
+        } else {
+            swtoast.error({ text: "Vui lòng đăng nhập" });
         }
     }
 

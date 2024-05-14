@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import axios from 'axios';
 import { swtoast } from '@/mixins/swal.mixin'
-import { Radio, Button } from 'antd';
+import { Radio, Button, Modal } from 'antd';
 import { FaShippingFast } from 'react-icons/fa'
 import CartItem from '@/components/CartPage/CartItem'
 import Input from '@/components/Input'
@@ -22,6 +22,14 @@ const CartPage = () => {
     const productList = useSelector((state) => state.cart.productList)
     const dispatch = useDispatch()
     const router = useRouter()
+    const formatter = new Intl.NumberFormat('vi', {
+        style: 'currency',
+        currency: 'VND',
+      
+        // These options are needed to round to whole numbers if that's what you want.
+        //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+        //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+      });
 
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
@@ -39,6 +47,14 @@ const CartPage = () => {
         return price + deliveryCharges
     }
 
+    const [checkedOnline, setCheckedOnline] = useState('COD')
+    const [openQR, setOpenQR] = useState(false)
+    const [code, setCode] = useState((Math.random() + 1).toString(36).substring(7).toUpperCase())
+
+    const handleCancel = (e) => {
+        setOpenQR(false);
+      };
+
     const handleOrder = async () => {
         if (isLoggedIn && productList.length) {
             try {
@@ -53,10 +69,14 @@ const CartPage = () => {
                     phone_number: phoneNumber,
                     address,
                     order_items: orderItems,
+                    type: checkedOnline,
+                    code: code
                 }
+
                 const respond = await axios.post(`${backendAPI}/api/order/create`, order)
                 dispatch(clearCart())
                 setLoading(false)
+                setOpenQR(false);
                 router.push('/account/orders')
                 swtoast.success({ text: "Đặt hàng thành công" });
             } catch (err) {
@@ -71,6 +91,40 @@ const CartPage = () => {
 
     return (
         <div className="cart-page">
+            <Modal
+                title='Xác nhận thanh toán bằng QR CODE'
+                open={openQR}
+                onOk={handleOrder}
+                okText="Tiến hành thanh toán"
+                cancelText="Hủy"
+                onCancel={handleCancel}
+                keyboard={false}
+            >
+           <div>
+                <div style={{display: 'flex', justifyContent: 'center'}}>
+                <img
+                style={{
+                    width: '250px',
+                    textAlign:'center',
+                    
+                }} 
+                src="https://i.ibb.co/S0P61Fh/77ce4753-f695-42a5-b3ef-553bf01ccef4.jpg" 
+                alt="77ce4753-f695-42a5-b3ef-553bf01ccef4"/>
+                </div>
+                <div className="ml-2">
+                   <div>
+                     Nội dụng chuyển khoản: <span style={{ fontWeight: 'bold' ,color: 'red'}}>{code}</span>
+                   </div>
+                   <div>
+                     Số tiền chuyển khoản: <span style={{ fontWeight: 'bold' ,color: 'red'}}>{formatPrice(finalTotal(totalPrice))}đ</span>
+                   </div>
+                    <div>
+                        <span>Chú ý: Vui lòng nhập đúng Code và số tiền thanh toán để tránh rủi ro xảy ra</span>
+                    </div>
+                </div>
+                
+           </div>
+            </Modal>
             <div className="row">
                 <div className="col-7 cart-left-section">
                     <div className="title">
@@ -110,7 +164,7 @@ const CartPage = () => {
                             value={address}
                             onChange={(e) => setAddress(e.target.value)}
                             error={error}
-                            placeholder="Địa chỉ (Ví dụ: 112/12 Hưng Lợi, Ninh Kiều)"
+                            placeholder="Địa chỉ"
                         />
                     </div>
                     <div className="payment">
@@ -120,7 +174,7 @@ const CartPage = () => {
                         <div>
                             <label htmlFor="" className="payment-item w-100 border-radius d-flex align-items-center justify-content-start">
                                 <div className='payment-item-radio'>
-                                    <Radio checked></Radio>
+                                    <Radio checked={checkedOnline == 'COD'} onChange={() => setCheckedOnline('COD')}></Radio>
                                 </div>
                                 <div className='payment-item-icon'>
                                     <FaShippingFast />
@@ -134,19 +188,20 @@ const CartPage = () => {
                         <div>
                             <label htmlFor="" className="payment-item w-100 border-radius d-flex align-items-center justify-content-start">
                                 <div className='payment-item-radio'>
-                                    <Radio checked={false}></Radio>
+                                    <Radio checked={checkedOnline == 'QR'} onChange={() => setCheckedOnline('QR')}></Radio>
                                 </div>
                                 <div className='payment-item-icon'>
-                                    <img src='https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png' style={{width: '35px'}}/>
+                                    <img src='https://store-images.s-microsoft.com/image/apps.3768.14340978627155335.c3c132d0-b7d3-451e-87e1-eccb331441e5.e65382c2-18b1-4b90-b63e-96e2609f16d3?h=464' style={{width: '35px'}}/>
                                 </div>
                                 <div className="payment-item-name">
-                                    <p className="text-uppercase">Momo</p>
-                                    <p className="">Momo</p>
+                                    <p className="text-uppercase">QR Pay</p>
+                                    <p className="">QR Pay</p>
                                 </div>
                             </label>
                         </div>
                     </div>
                     <Button
+                    disabled={!productList?.length}
                     style={{
                         padding: '22px 0px',
                         background: 'orange',
@@ -155,7 +210,13 @@ const CartPage = () => {
                        alignItems: 'center',
                        justifyContent: 'center'
                     }}
-                    loading={loading} type='primary' onClick={handleOrder} block>Đặt Hàng</Button>
+                    loading={loading} type='primary' onClick={async () => {
+                        if(checkedOnline == 'QR') {
+                            setOpenQR(true)
+                        } else {
+                           await handleOrder()
+                        }
+                    }} block>Đặt Hàng</Button>
                 </div>
                 <div className="col-5 cart-right-section">
                     <div className="title">

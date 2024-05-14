@@ -14,7 +14,7 @@ import * as actions from '../../store/actions';
 const ProductManagementPage = () => {
     let [listProductVariant, setListProductVariant] = useState([]);
     const dispatch = useDispatch();
-
+    console.log('listProductVariant', listProductVariant)
     useEffect(() => {
         const getListProductVariant = async () => {
             try {
@@ -35,20 +35,20 @@ const ProductManagementPage = () => {
 
     return (
         <div className="product-manager">
-            <Header title="Quản lý sản phẩm" />
+            <Header title="Quản lý phân loại sản phẩm" />
             <div className="wrapper manager-box">
                 <div className="to-add-product-page">
                     <button onClick={() => Router.push('/product/create')} className="to-add-product-page-btn">
                         Thêm sản phẩm
                     </button>
                 </div>
-                <Heading title="Tất cả sản phẩm" />
+                <Heading title="Tất cả phân loại sản phẩm" />
                 <div className="wrapper-product-admin table-responsive">
                     <table className='table product-admin w-100'>
                         <thead className="w-100 align-middle text-center">
                             <tr className="fs-6 w-100">
                                 <th title='Tên sản phẩm' className="name col-infor-product">
-                                    Sản phẩm
+                                    Tên phân loại
                                 </th>
                                 <th title='Giá sản phẩm' className="col-price">Giá</th>
                                 <th title='Tồn kho' className="col-quantity">Tồn kho</th>
@@ -62,7 +62,8 @@ const ProductManagementPage = () => {
                         listProductVariant.length ?
                             listProductVariant.map((productVariant, index) => {
                                 return (
-                                    <ProductAdmin
+                                    <div key={index}>
+                                        <ProductAdmin
                                         key={index}
                                         product_id={productVariant.product_id}
                                         product_variant_id={productVariant.product_variant_id}
@@ -76,6 +77,7 @@ const ProductManagementPage = () => {
                                         created_at={productVariant.created_at}
                                         refreshProductVariantTable={refreshProductVariantTable}
                                     />
+                                    </div>
                                 )
                             })
                             :

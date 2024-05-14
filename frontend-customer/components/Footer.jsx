@@ -69,7 +69,7 @@ const Footer = () => {
 						<ul>
 							<li>
 								<h5>
-									ELEVENT lắng nghe bạn!
+									HienThanhShop luôn lắng nghe bạn!
 								</h5>
 								<ul className='fs-13'>
 									<li>
@@ -107,7 +107,7 @@ const Footer = () => {
 					</div>
 				</div>
 				<div className="copy-right-box fs-11 position-relative">
-					<p className="fw-bold text-uppercase">© Công ty tnhh elevent</p>
+					<p className="fw-bold text-uppercase">© Công ty tnhh hienthanh</p>
 					<p>Mã số doanh nghiệp: 0108617038. Giấy chứng nhận đăng ký doanh nghiệp do Sở Kế hoạch và Đầu tư TP Hà Nội cấp lần đầu ngày 20/02/2019.</p>
 				</div>
 			</div>

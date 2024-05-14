@@ -37,8 +37,9 @@ const Header = () => {
 	const [isRegisterOpen, setIsRegisterOpen] = useState(false)
 	const [isClose, setIsClose] = useState(true)
 	const isLoggedIn = useSelector(state => state.customer.isLoggedIn);
+	const user = useSelector(state => state.customer);
 	const dispatch = useDispatch()
-
+	console.log('user', user)
 	useEffect(() => {
 		const handleGetCategory = async () => {
 			try {
@@ -85,7 +86,7 @@ const Header = () => {
 			<div className="header w-100 d-flex align-items-center">
 				<div className="logo-box p-2">
 					<Link href="/">
-						<img className='logo' src="../img/logo.png" alt="" />
+					<img src="https://i.ibb.co/xSyHsDj/logo.png" alt="logo"/>
 					</Link>
 				</div>
 				<ul className="menu p-2">
@@ -128,6 +129,12 @@ const Header = () => {
 				</ul>
 
 				<ul className="header-inner p-2 ms-auto">
+					{!!isLoggedIn && (
+						<li className="cart inner-item menu-item fw-bold text-uppercase">
+						Xin chào: <span style={{color: 'red', fontWeight: 'bold'}}>{user?.customerInfo?.customer_name}</span>
+					</li>
+					)}
+					
 					{
 						!isLoggedIn ?
 							<li onClick={() => {
@@ -139,7 +146,7 @@ const Header = () => {
 							:
 							<>
 								<li className="inner-item menu-item fw-bold text-uppercase">
-									<Link href="/account/infor">Account</Link>
+									<Link href="/account/infor">Tài khoản</Link>
 								</li>
 								<li onClick={() => {
 									swalert
@@ -157,13 +164,14 @@ const Header = () => {
 											}
 										})
 								}} className="inner-item menu-item fw-bold text-uppercase">
-									<a href='#'>Log Out</a>
+									<a href='#'>Đăng xuất</a>
 								</li>
 							</>
 					}
 					<li className="cart inner-item menu-item fw-bold text-uppercase">
-						<Link href="/cart"><FaShoppingBag /></Link>
+						<Link href="/cart"><FaShoppingBag className="mx-2"/>Giỏ hàng</Link>
 					</li>
+					
 				</ul>
 			</div>
 		</div>

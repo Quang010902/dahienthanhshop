@@ -34,6 +34,29 @@ let register = async (req, res, next) => {
     }
 }
 
+const block = async (req, res, next) => {
+    let user_id = req.body.user_id;
+
+    if (user_id === undefined) return res.status(400).send('Trường user_id không tồn tại');
+    let customer = await User.findOne({ where: { user_id  } });
+    if (!customer) return res.status(409).send("Customer không tồn tại");
+
+    let numberUpdate = await User.update(
+        { statusUser: !customer.statusUser},
+        { where: { user_id } }
+    )
+    if (numberUpdate) {
+        return res.send({
+            success:true,
+            message: 'Thành công'
+        });
+        
+    } else {
+        return res.status(400).send("Có lỗi trong quá trình cập nhật vui lòng thử lại");
+    }
+
+}
+
 let login = async (req, res, next) => {
     let email = req.body.email;
     if (email === undefined) return res.status(400).send('Trường email không tồn tại');
@@ -61,12 +84,19 @@ let login = async (req, res, next) => {
             email: customer.email,
             customer_name: customer.Customer_Info.customer_name,
             phone_number: customer.Customer_Info.phone_number,
-            address: customer.Customer_Info.address
+            address: customer.Customer_Info.address,
+            statusUser: customer.statusUser,
         });
     } catch (err) {
         console.log(err);
         return res.status(400).send("Có lỗi trong quá trình đăng nhập vui lòng thử lại");
     }
+}
+
+const getUsers = async (req, res, next) => {
+    let customer = await User.findAll();
+
+    res.json(customer)
 }
 
 let update = async (req, res, next) => {
@@ -80,7 +110,7 @@ let update = async (req, res, next) => {
     if (address === undefined) return res.status(400).send('Trường address không tồn tại');
 
     try {
-        let customer = await User.findOne({ where: { user_id, role_id: 2 } });
+        let customer = await User.findOne({ where: { user_id } });
         if (!customer) return res.status(409).send("Customer không tồn tại");
 
         let numberUpdate = await Customer_Info.update(
@@ -105,5 +135,7 @@ let update = async (req, res, next) => {
 module.exports = {
     register,
     login,
-    update
+    update,
+    getUsers,
+    block
 };

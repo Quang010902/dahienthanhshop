@@ -2,11 +2,11 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
-import { Rate, Button } from 'antd';
+import { Rate, Button, Modal, Input } from 'antd';
 import { StarFilled } from '@ant-design/icons'
 import { swtoast } from '@/mixins/swal.mixin'
 import { formatPrice, formatRate } from '../../helpers/format.js'
-
+const {TextArea} = Input
 import CarouselFade from '@/components/ProductDetailPage/Carousel.jsx'
 import OptionButton from '@/components/ProductDetailPage/OptionButton.jsx'
 import ProductQuantityInput from '@/components/ProductDetailPage/ProductQuantityInput.jsx'
@@ -15,6 +15,7 @@ import FeedbackBox from '@/components/ProductDetailPage/FeedbackBox.jsx'
 import { policyList } from '@/data/PolicyData'
 import { addToCart, clearError } from '@/store/actions/cartActions'
 import { backendAPI } from '@/config'
+import CreateFeedbackModal from '@/components/OrderHistoryPage/CreateFeedbackModal.jsx';
 
 const fakeColourList = [{ colour_id: 1, colour_name: 'Trắng' }, { colour_id: 2, colour_name: 'Đen' }];
 const fakeSizeList = [{ size_id: 1, size_name: 'S' }, { size_id: 2, size_name: 'M' }, { size_id: 3, size_name: 'L' }];
@@ -50,33 +51,35 @@ const ProductDetailPage = () => {
 	const [product_image, setProduct_Image] = useState([]);
 
 	const [feedbackList, setFeedbackList] = useState([])
+	console.log('product_id', feedbackList)
+	const handleGetProduct = async () => {
+		try {
+			let respond = await axios.get(backendAPI + `/api/product/customer/detail/${product_id}`);
+			setProductName(respond.data.product_name);
+			setProductDescription(respond.data.description);
+			setFeedbackQuantity(respond.data.feedback_quantity);
+			setRating(respond.data.rating);
+			setSold(respond.data.sold);
 
-	useEffect(() => {
-		const handleGetProduct = async () => {
-			try {
-				let respond = await axios.get(backendAPI + `/api/product/customer/detail/${product_id}`);
-				setProductName(respond.data.product_name);
-				setProductDescription(respond.data.description);
-				setFeedbackQuantity(respond.data.feedback_quantity);
-				setRating(respond.data.rating);
-				setSold(respond.data.sold);
-
-				respond = await axios.get(backendAPI + `/api/product/customer/list-colour/${product_id}`);
-				setColorList(respond.data);
-				setSelectedColorIndex(0);
-				for (let index in respond.data) {
-					if (respond.data[index].colour_id == colour)
-						setSelectedColorIndex(parseInt(index));
-				}
-
-				respond = await axios.get(backendAPI + `/api/feedback/list/${product_id}`);
-				setFeedbackList(respond.data)
-			} catch (error) {
-				console.log(error);
-				setColorList(fakeColourList);
-				setSelectedColorIndex(0);
+			respond = await axios.get(backendAPI + `/api/product/customer/list-colour/${product_id}`);
+			setColorList(respond.data);
+			setSelectedColorIndex(0);
+			for (let index in respond.data) {
+				if (respond.data[index].colour_id == colour)
+					setSelectedColorIndex(parseInt(index));
 			}
+
+			respond = await axios.get(backendAPI + `/api/feedback/list/${product_id}`);
+			console.log('respond',respond)
+			setFeedbackList(respond.data)
+		} catch (error) {
+			console.log(error);
+			setColorList(fakeColourList);
+			setSelectedColorIndex(0);
 		}
+	}
+	useEffect(() => {
+		
 		if (product_id) {
 			handleGetProduct();
 		}
@@ -149,9 +152,21 @@ const ProductDetailPage = () => {
 		if (!isErrorInCart)
 			swtoast.success({ text: "Thêm sản phẩm vào giỏ hàng thành công" });
 	}
+    const [isCreateFeedbackModalOpen, setIsCreateFeedbackModalOpen] = useState(false);
+    const [productVariantIdForFeedBack, setProductVariantIdForFeedBack] = useState(null);
 
 	return (
 		<div className='product-detail-page'>
+			{isCreateFeedbackModalOpen &&
+                    <CreateFeedbackModal
+                        isOpen={isCreateFeedbackModalOpen}
+                        setIsOpen={setIsCreateFeedbackModalOpen}
+                        productVariantId={+product_id}
+						url={'/api/feedback/createFeedBack'}
+                        setProductVariantId={setProductVariantIdForFeedBack}
+                        refreshOrderList={handleGetProduct}
+                    />
+                }
 			<div className="row main-infor-product">
 				<div className="col-4">
 					<CarouselFade product_image={product_image} />
@@ -160,8 +175,11 @@ const ProductDetailPage = () => {
 					<h6 className="product-name">{productName}</h6>
 					<div className="rating d-flex align-items-center">
 						<span className='d-flex align-items-center'>
-							<Rate disabled allowHalf value={rating} />
-							<h6 className='d-inline-block'>({feedbackQuantity})</h6>
+							<Rate disabled allowHalf value={
+								feedbackList?.map(item => item?.rate).reduce(function (x, y) {
+									return x + y;
+								}, 0) / feedbackList?.length} />
+							<h6 className='d-inline-block'>({feedbackList?.length})</h6>
 						</span>
 						<span style={{ margin: "2px 0 0" }}>Đã bán (web): {sold}</span>
 					</div>
@@ -239,12 +257,15 @@ const ProductDetailPage = () => {
 			</div>
 			<div className="review-box position-relative d-flex align-items-center">
 				<div className="">
-					<h5 className='feedback_quantify-detail d-inline-block'>{feedbackQuantity} Đánh giá</h5>
-					<h5 className='rating-detail d-inline-block'>{formatRate(rating)} / 5 <span className='star-icon'><StarFilled /></span></h5>
+					<h5 className='feedback_quantify-detail d-inline-block'>{feedbackList?.length || 0} Đánh giá</h5>
+					<h5 className='rating-detail d-inline-block'>{feedbackList?.map(item => item?.rate).reduce(function (x, y) {
+return x + y;
+}, 0) / feedbackList?.length} / 5 <span className='star-icon'><StarFilled /></span></h5>
 				</div>
 				<div>
-						<Button type="primary">Thêm đánh giá cho sản phẩm này</Button>
+					<Button onClick={() => setIsCreateFeedbackModalOpen(true)} type="primary">Thêm đánh giá cho sản phẩm này</Button>
 				</div>
+
 			</div>
 			<FeedbackBox feedbackList={feedbackList} />
 		</div >

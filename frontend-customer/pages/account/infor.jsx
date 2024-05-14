@@ -19,7 +19,7 @@ const CustomerInfoPage = () => {
     const [phoneNumber, setPhoneNumber] = useState('')
     const [address, setAddress] = useState('')
     const customerInfo = useSelector((state) => state.customer.customerInfo)
-
+    
     useEffect(() => {
         customerInfo != null ? setCustomerId(customerInfo.customer_id) : setCustomerId('')
         customerInfo != null ? setEmail(customerInfo.email) : setEmail('')
@@ -29,6 +29,24 @@ const CustomerInfoPage = () => {
     }, [customerInfo])
 
     const handleUpdate = async () => {
+        if(!address) {
+            swtoast.error({
+                text: "Vui lòng nhập địa chỉ!"
+            });
+            return
+        }
+        if(!customerName) {
+            swtoast.error({
+                text: "Vui lòng nhập tên!"
+            });
+            return
+        }
+        if(!phoneNumber) {
+            swtoast.error({
+                text: "Vui lòng nhập số điện thoại!"
+            });
+            return
+        }
         if (validate()) {
             try {
                 let customer = {
@@ -127,7 +145,7 @@ const CustomerInfoPage = () => {
                                 type="text"
                                 value={address}
                                 onChange={(e) => setAddress(e.target.value)}
-                                placeholder='Địa chỉ (Ví dụ: 112/12 3/2 Hưng Lợi, Ninh Kiều)'
+                                placeholder='Địa chỉ'
                             />
                         </div>
                     </div>

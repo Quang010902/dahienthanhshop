@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 
@@ -6,6 +6,8 @@ import Header from '@/components/Header'
 import Loading from '@/components/Loading'
 import { formatTime, formatPrice, formatAllInDate } from '@/helpers/format'
 import { homeAPI } from '@/config'
+import {ReactToPrint} from 'react-to-print'
+import { Button } from 'antd'
 
 const OrderDetailPage = () => {
 	const router = useRouter()
@@ -30,10 +32,18 @@ const OrderDetailPage = () => {
 
 		if (id_order) getOrderItem()
 	}, [])
-
+	const printRef = useRef()
 	return (
 		<div className="order-detail-page">
 			<Header />
+			<ReactToPrint
+				trigger={() => <Button style={{background: 'black', color: 'white'}}>In phiếu</Button>}
+				content={() => printRef.current}
+				documentTitle='HienThanShop'
+				pageStyle="print"
+			/>
+			
+			<div ref={printRef}>
 			<div className="header-order-detail-page">
 				<p className="fw-bold" style={{ fontSize: "20px" }}>
 					Đơn hàng #{orderDetail.order_id}
@@ -151,6 +161,7 @@ const OrderDetailPage = () => {
 						</div>
 					</div>
 				</div>
+			</div>
 			</div>
 			{isLoading && <Loading />}
 		</div>

@@ -12,6 +12,8 @@ const Order_Status_Change_History = require('../models/order_status_change_histo
 
 let create = async (req, res, next) => {
     let user_id = req.body.user_id;
+    let type = req.body.type;
+    let code = req.body.code;
     if (user_id === undefined) return res.status(400).send('Trường user_id không tồn tại');
     try {
         let user = await User.findOne({ where: { user_id, role_id: 2 } });
@@ -43,6 +45,8 @@ let create = async (req, res, next) => {
             total_product_value: 0,
             delivery_charges: 0,
             total_order_value: 0,
+            type,
+            code,
         });
 
         let total_product_value = 0;
@@ -95,7 +99,7 @@ let create = async (req, res, next) => {
 let listAdminSide = async (req, res, next) => {
     try {
         let orderList = await Order.findAll({
-            attributes: ['order_id', 'total_order_value'],
+            attributes: ['order_id', 'total_order_value', 'type', 'code'],
             include: [
                 {
                     model: Order_Status_Change_History, where: { state_id: 1 }
@@ -114,7 +118,9 @@ let listAdminSide = async (req, res, next) => {
                 total_order_value: order.total_order_value,
                 state_id: state.state_id,
                 state_name: state.state_name,
-                created_at: order.Order_Status_Change_Histories[0].created_at
+                created_at: order.Order_Status_Change_Histories[0].created_at,
+                type: order.type,
+                code: order.code,
             }
             return newOrder;
         }));

@@ -6,7 +6,7 @@ import { FaTrash, FaPencilAlt } from "react-icons/fa"
 import { Switch } from 'antd';
 import Swal from "sweetalert2";
 import { Button} from 'antd'
-
+import ReactImageZoom from 'react-image-zoom';
 const ProductAdmin = (props) => {
 
     const addPointToPrice = (price) => {
@@ -130,10 +130,13 @@ const ProductAdmin = (props) => {
                 <tbody className='w-100 text-center'>
                     <tr className="w-100">
                         <td className='col-infor-product'>
+                            <div>
                             <p className="name">
                                 {props.product_name + '-' + props.colour_name + '-' + props.size_name}
                             </p>
-                            <img src={props.product_image} />
+                            {/* <img style={{ width: '60px'}} src={props.product_image} /> */}
+                            <ReactImageZoom {...{width: 100 ,height: 200,zoomWidth: 500,zoomHeight: 500, img: `${props.product_image}`}}/>
+                            </div>
                         </td>
                         <td className="text-danger fw-bold col-price">
                             <p className='d-flex align-items-center justify-content-center'>
@@ -157,13 +160,15 @@ const ProductAdmin = (props) => {
                             <Switch checked={props.state} onChange={handleUpdateState} disabled={disabledInputState} />
                         </td>
                         <td className="col-action manipulation">
-                            <Button>
+                           <div style={{ display: 'flex', alignItems: 'center'}}>
+                           <Button>
                                 <Link href={`/product/update/${props.product_id}`}>
                                     Chỉnh sửa
                                 </Link>
                             </Button>
-                            <br />
-                            <FaTrash style={{ cursor: "pointer" }} title='Xóa' className="text-danger" onClick={() => handleDelete()} />
+                            
+                            <FaTrash style={{ cursor: "pointer", marginLeft: '5px' }} title='Xóa' className="text-danger" onClick={() => handleDelete()} />
+                           </div>
                         </td>
                     </tr>
                 </tbody>

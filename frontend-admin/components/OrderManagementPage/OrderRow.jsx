@@ -4,7 +4,7 @@ import axios from 'axios'
 import { swalert, swtoast } from "@/mixins/swal.mixin";
 
 const OrderRow = (props) => {
-    const { order_id, state_id, state_name, created_at, total_order_value, refreshOrderTable } = props;
+    const {code, order_id, state_id, state_name, created_at, total_order_value, refreshOrderTable } = props;
 
     const addPointToPrice = (price) => {
         return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -180,7 +180,7 @@ const OrderRow = (props) => {
                     <tr className="w-100">
                         <td className="fw-bold col-order-id">
                             <p className="d-flex align-items-center justify-content-center">
-                                #{order_id}
+                                {code || order_id}
                             </p>
                         </td>
                         <td className="text-danger fw-bold col-state">

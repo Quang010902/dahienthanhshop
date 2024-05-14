@@ -3,8 +3,10 @@ import { StarFilled } from '@ant-design/icons'
 import { frontendAPI } from '@/config'
 import { formatRate } from '@/helpers/format'
 import Link from "next/link";
+import { useRouter } from 'next/router';
 
 const ProductItem = (props) => {
+    const router = useRouter()
     return (
         <div className='product-item'>
             <Link href={{ pathname: `/product/${props.product_id}`, query: { colour: props.colour_id } }}>
@@ -31,7 +33,12 @@ const ProductItem = (props) => {
                         {
                             props.sizes.map((item, index) => {
                                 return (
-                                    <span className="size-item d-inline-block text-center" key={index}>{item}</span>
+                                    <span onClick={() => {
+                                            router.push({
+                                                pathname: `/product/${props.product_id}`,
+                                                query: { size: item },
+                                            })
+                                      }} className="size-item d-inline-block text-center" key={index}>{item}</span>
                                 )
                             })
                         }
