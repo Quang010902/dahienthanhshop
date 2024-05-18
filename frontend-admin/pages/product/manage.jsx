@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Empty } from 'antd'
 import axios from 'axios'
@@ -7,6 +7,7 @@ import Header from '@/components/Header'
 import Heading from '@/components/Heading'
 import ProductAdmin from '@/components/ProductManagementPage/ProductAdmin'
 import Router from 'next/router'
+import ReactPaginate from "react-paginate";
 
 import * as actions from '../../store/actions';
 
@@ -14,7 +15,14 @@ import * as actions from '../../store/actions';
 const ProductManagementPage = () => {
     let [listProductVariant, setListProductVariant] = useState([]);
     const dispatch = useDispatch();
+    
     console.log('listProductVariant', listProductVariant)
+        const [searchInput, setSearchInput] = useState('');
+
+    const [pageNumber, setPageNumber] = useState(0);
+
+    const usersPerPage = 6;
+    const pagesVisited = pageNumber * usersPerPage;
     useEffect(() => {
         const getListProductVariant = async () => {
             try {
@@ -33,8 +41,20 @@ const ProductManagementPage = () => {
         setListProductVariant(result.data)
     }
 
+    const displayUsers = useMemo(() => {
+        return [...listProductVariant.slice(pagesVisited, pagesVisited + usersPerPage)]
+    }, [listProductVariant, pagesVisited, usersPerPage])
+    console.log('displayUsers', displayUsers)
+
+  const pageCount = Math.ceil(listProductVariant.length / usersPerPage);
+
+  const changePage = ({ selected }) => {
+    setPageNumber(selected);
+  };
+
     return (
-        <div className="product-manager">
+       <>
+         <div className="product-manager">
             <Header title="Quản lý phân loại sản phẩm" />
             <div className="wrapper manager-box">
                 <div className="to-add-product-page">
@@ -59,8 +79,8 @@ const ProductManagementPage = () => {
                         </thead>
                     </table>
                     {
-                        listProductVariant.length ?
-                            listProductVariant.map((productVariant, index) => {
+                        displayUsers.length ?
+                        displayUsers.map((productVariant, index) => {
                                 return (
                                     <div key={index}>
                                         <ProductAdmin
@@ -87,9 +107,29 @@ const ProductManagementPage = () => {
                                 </tbody>
                             </table>
                     }
+              
+                </div>
+               
+            </div>
+            
+        </div>
+        <div className='row'>
+                <div className='col-7'></div>
+                <div className='col-5'>
+                <ReactPaginate
+                    previousLabel={"Sau"}
+                    nextLabel={"Trước"}
+                    pageCount={pageCount}
+                    onPageChange={changePage}
+                    containerClassName={"paginationBttns"}
+                    previousLinkClassName={"previousBttn"}
+                    nextLinkClassName={"nextBttn"}
+                    disabledClassName={"paginationDisabled"}
+                    activeClassName={"paginationActive"}
+                />
                 </div>
             </div>
-        </div>
+       </>
     )
 }
 

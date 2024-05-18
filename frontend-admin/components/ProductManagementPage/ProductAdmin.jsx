@@ -125,7 +125,7 @@ const ProductAdmin = (props) => {
     }
 
     return (
-        <div className="table-responsive">
+        <div key={props?.product_name} className="table-responsive">
             <table className="table align-middle product-admin w-100">
                 <tbody className='w-100 text-center'>
                     <tr className="w-100">
@@ -135,7 +135,7 @@ const ProductAdmin = (props) => {
                                 {props.product_name + '-' + props.colour_name + '-' + props.size_name}
                             </p>
                             {/* <img style={{ width: '60px'}} src={props.product_image} /> */}
-                            <ReactImageZoom {...{width: 100 ,height: 200,zoomWidth: 500,zoomHeight: 500, img: `${props.product_image}`}}/>
+                            <ReactImageZoom key={props.product_name} {...{width: 100 ,height: 200,zoomWidth: 500,zoomHeight: 500, img: `${props.product_image}`}}/>
                             </div>
                         </td>
                         <td className="text-danger fw-bold col-price">
