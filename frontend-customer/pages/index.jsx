@@ -3,29 +3,54 @@ import { Inter } from '@next/font/google'
 import Slider from '@/components/Slider'
 import { ArrowUpOutlined } from '@ant-design/icons'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import ProductItem from '@/components/CollectionPage/ProductItem'
 import { backendAPI } from '@/config'
 import { Divider } from 'antd'
+import ReactPaginate from "react-paginate";
 
 const inter = Inter({ subsets: ['latin'] })
 export default function HomePage() {
 	const [productList, setProductList] = useState([])
 	const router = useRouter()
-	useEffect(() => {
-        const getProductList = async () => {
-            try {
-                let url = `${backendAPI}/api/product/customer/list`
-                const result = await axios.get(url)
-                setProductList(result.data)
-            } catch (err) {
-                console.log(err)
-            }
-        }
+	const [categoryList, setCategoryList] = useState([]);
+	const [pageNumber, setPageNumber] = useState(0);
 
-        getProductList()
-    }, [])
+    const usersPerPage = 10;
+    const pagesVisited = pageNumber * usersPerPage;
+	useEffect(() => {
+		const handleGetCategory = async () => {
+			try {
+				let respond = await axios.get(backendAPI + '/api/category/nest-list');
+			
+				setCategoryList(respond.data)
+			} catch (error) {
+				console.log(error);
+				setCategoryList(fakeCategoryList);
+			}
+		}
+		handleGetCategory();
+	}, [])
+	useEffect(() => {
+		const item = categoryList.flatMap(item => {
+			return [...item?.children?.map(item => item?.category_id), item?.category_id]
+		}).map(item => axios.get(`${backendAPI}/api/product/customer/list?category=${item}`))
+
+		Promise.all([...item]).then(function(values) {
+			const items = values?.flatMap(item => [...item?.data])
+			setProductList(items)
+		  });
+	}, [categoryList])
+	
+	const productss = useMemo(() => {
+		return [...new Map(productList?.map(item => [item['product_variant_id'], item])).values()].slice(pagesVisited, pagesVisited + usersPerPage)
+	}, [pagesVisited, productList, usersPerPage])
+	const pageCount = Math.ceil([...new Map(productList?.map(item => [item['product_variant_id'], item])).values()].length / usersPerPage);
+
+	const changePage = ({ selected }) => {
+	  setPageNumber(selected);
+	};
 	return (
 		<>
 			<Head>
@@ -46,8 +71,8 @@ export default function HomePage() {
 				<div className="product-page">
 					<div className="product-box d-flex flex-row flex-wrap justify-content-start">
 						{
-							productList.length ?
-								productList.map((product, index) => {
+							productss.length ?
+							productss.map((product, index) => {
 									return (
 										<ProductItem
 											key={index}
@@ -55,6 +80,7 @@ export default function HomePage() {
 											name={product.product_name}
 											img={product.product_image}
 											price={product.price}
+											colour_name={product.colour_name}
 											colour_id={product.colour_id}
 											sizes={product.sizes}
 											rating={product.rating}
@@ -68,6 +94,22 @@ export default function HomePage() {
 								</div>
 						}
 					</div>
+					<div className='row'>
+                <div className='col-7'></div>
+                <div className='col-5'>
+                <ReactPaginate
+                previousLabel={"Sau"}
+                nextLabel={"Trước"}
+                pageCount={pageCount}
+                onPageChange={changePage}
+                containerClassName={"paginationBttns"}
+                previousLinkClassName={"previousBttn"}
+                nextLinkClassName={"nextBttn"}
+                disabledClassName={"paginationDisabled"}
+                activeClassName={"paginationActive"}
+            />
+                </div>
+            </div>
 				</div>
 				<div className="homepage-basic bg-dark text-light">
 					<div className="d-flex">

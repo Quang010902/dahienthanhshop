@@ -60,3 +60,36 @@ body {
     padding-left: 64px;
     padding-right: 64px;
 }
+.paginationBttns {
+    width: 80%;
+    height: 40px;
+    list-style: none;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .paginationBttns a {
+    padding: 10px;
+    margin: 8px;
+    border-radius: 5px;
+    border: 1px solid white;
+    color: white;
+    cursor: pointer;
+    background: black;
+  }
+  
+  .paginationBttns a:hover {
+    color: white;
+    background-color: black;
+  }
+  
+  .paginationActive a {
+    color: black;
+    border: 1px solid gray;
+    background-color: white;
+  }
+  
+  .paginationDisabled a {
+    color: white;
+    background-color: black;
+  }

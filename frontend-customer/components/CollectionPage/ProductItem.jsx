@@ -47,7 +47,7 @@ const ProductItem = (props) => {
             </Link>
             <div className="infor-product">
                 <Link href={{ pathname: `/product/${props.product_id}`, query: { colour: props.colour_id } }}>
-                    <h6>{props.name}</h6>
+                    <h6>{props.name} {props?.colour_name}</h6>
                 </Link>
                 <div className='d-flex justify-content-start'>
                     <p className='price-after text-danger fw-bold'>{props.price}đ</p>

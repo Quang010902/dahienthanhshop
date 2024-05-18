@@ -27,7 +27,7 @@ export default function MyApp({ Component, pageProps }) {
 					crossOrigin="anonymous"
 				/>
 				<Head>
-					<title>ElevenT</title>
+					<title>HienThanh Shop</title>
 					<link rel="icon" href="../img/favicon.jpg" />
 				</Head>
 				<NextNProgress color="#53BD95" />

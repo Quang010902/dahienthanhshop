@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 import { Button, Empty, Input } from 'antd'
+import ReactPaginate from "react-paginate";
 
 import ProductItem from '@/components/CollectionPage/ProductItem'
 
@@ -15,15 +16,20 @@ const CollectionPage = () => {
     const [typeSort, setTypeSort] = useState('desc')
     const [productListFilter, setProductListFilter] = useState([])
     const [searchInput, setSearchInput] = useState('');
-    console.log('productListFilter',productListFilter)
-    console.log('productList',productList)
+
+    const [pageNumber, setPageNumber] = useState(0);
+
+    const usersPerPage = 8;
+    const pagesVisited = pageNumber * usersPerPage;
+  
     useEffect(() => {
         const getProductList = async () => {
             try {
                 let url = category ? `${backendAPI}/api/product/customer/list?category=${category}` : `${backendAPI}/api/product/customer/list`
                 const result = await axios.get(url)
                 setProductList(result.data ? [...new Map(result.data?.map(item => [item['product_variant_id'], item])).values()] : [])
-                setProductListFilter(result.data ? [...new Map(result.data?.map(item => [item['product_variant_id'], item])).values()] : [])
+                    setProductListFilter(result.data ? [...new Map(result.data?.map(item => [item['product_variant_id'], item])).values()] : [])
+                
             } catch (err) {
                 console.log(err)
             }
@@ -35,6 +41,17 @@ const CollectionPage = () => {
     const products = useMemo(() => {
         return typeSort == 'desc' ? [...productListFilter].sort((a, b) => a.price - b.price) : [...productListFilter].sort((a, b) => b.price - a.price)
     }, [typeSort, productListFilter])
+
+    const displayUsers = useMemo(() => {
+        return [...products.slice(pagesVisited, pagesVisited + usersPerPage)]
+    }, [products, pagesVisited, usersPerPage])
+    console.log('displayUsers', displayUsers)
+
+  const pageCount = Math.ceil(products.length / usersPerPage);
+
+  const changePage = ({ selected }) => {
+    setPageNumber(selected);
+  };
 
     return (
         <div className="product-page">
@@ -75,14 +92,15 @@ const CollectionPage = () => {
             </div>
             <div className="product-box d-flex flex-row flex-wrap justify-content-start">
                 {
-                    products.length ?
-                    products.map((product, index) => {
+                    displayUsers.length ?
+                    displayUsers.map((product, index) => {
                             return (
                                 <ProductItem
                                     key={index}
                                     product_id={product.product_id}
                                     name={product.product_name}
                                     img={product.product_image}
+                                    colour_name={product.colour_name}
                                     price={product.price}
                                     colour_id={product.colour_id}
                                     sizes={product.sizes}
@@ -96,6 +114,22 @@ const CollectionPage = () => {
                             <Empty style={{ margin: "auto" }} />
                         </div>
                 }
+            </div>
+            <div className='row'>
+                <div className='col-7'></div>
+                <div className='col-5'>
+                <ReactPaginate
+                previousLabel={"Sau"}
+                nextLabel={"Trước"}
+                pageCount={pageCount}
+                onPageChange={changePage}
+                containerClassName={"paginationBttns"}
+                previousLinkClassName={"previousBttn"}
+                nextLinkClassName={"nextBttn"}
+                disabledClassName={"paginationDisabled"}
+                activeClassName={"paginationActive"}
+            />
+                </div>
             </div>
         </div>
     )
